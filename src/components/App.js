@@ -3,6 +3,7 @@ import Web3 from 'web3'
 import Token from '../abis/Token.json'
 import EthSwap from '../abis/EthSwap.json'
 import Navbar from './Navbar'
+import Main from './Main'
 import './App.css'
 
 class App extends Component {
@@ -27,7 +28,7 @@ class App extends Component {
     if(tokenData) {
       const token = new web3.eth.Contract(Token.abi, tokenData.address)
       this.setState({ token })
-      let tokenBalance = await token.methods.balanceOf(this.state.account).call()
+      const tokenBalance = await token.methods.balanceOf(this.state.account).call()
       this.setState({ tokenBalance: tokenBalance.toString() })
     } else {
       window.alert('Token contract not deployed to detected network.')
@@ -41,6 +42,8 @@ class App extends Component {
     } else {
       window.alert('EthSwap contract not deployed to detected network.')
     }
+
+    this.setState({ loading: false })
   }
 
   async loadWeb3() {
@@ -57,6 +60,22 @@ class App extends Component {
     }
   }
 
+  buyTokens = (etherAmount) => {
+    this.setState({ loading: true })
+    this.state.ethSwap.methods.buyTokens().send({ value: etherAmount, from: this.state.account }).on('transactionHash', (hash) => {
+      this.setState({ loading: false })
+    })
+  }
+
+  sellTokens = (tokenAmount) => {
+    this.setState({ loading: true })
+    this.state.token.methods.approve(this.state.ethSwap.address, tokenAmount).send({ from: this.state.account }).on('transactionHash', (hash) => {
+      this.state.ethSwap.methods.sellTokens(tokenAmount).send({ from: this.state.account }).on('transactionHash', (hash) => {
+        this.setState({ loading: false })
+      })
+    })
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -64,11 +83,23 @@ class App extends Component {
       token: {},
       ethSwap: {},
       ethBalance: '0',
-      tokenBalance: ''
+      tokenBalance: '0',
+      loading: true
     }
   }
 
   render() {
+    let content
+    if (this.state.loading) {
+      content = <p id="loader" className="text-center">Loading...</p>
+    } else {
+      content = <Main
+        ethBalance={this.state.ethBalance}
+        tokenBalance={this.state.tokenBalance}
+        buyTokens={this.buyTokens}
+        sellTokens={this.sellTokens}
+        />
+    }
     return (
       <div>
         <Navbar account={this.state.account} />
@@ -81,9 +112,8 @@ class App extends Component {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                   {/* <img src={} className="App-logo" alt="logo" />  */}
                 </a>
-                <h1>Welcome!</h1>
+                {content}
               </div>
             </main>
           </div>
