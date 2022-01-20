@@ -14,10 +14,10 @@ class SellForm extends Component {
     return (
       <form className="mb-3" onSubmit={(event) => {
         event.preventDefault()
-        let tokenAmount
-        tokenAmount = this.input.value.toString()
-        tokenAmount = window.web3.utils.toWei(tokenAmount, 'Ether')
-        this.props.sellTokens(tokenAmount)
+        let etherAmount
+        etherAmount = this.input.value.toString()
+        etherAmount = window.web3.utils.toWei(etherAmount, 'Ether')
+        this.props.sellTokens(etherAmount)
       }}>
         <div>
           <label className="float-left"><b>Input</b></label>
@@ -30,7 +30,6 @@ class SellForm extends Component {
             type="text"
             onChange={(event) => {
               const tokenAmount = this.input.value.toString()
-              console.log(tokenAmount)
               this.setState({
                 output: tokenAmount / 100
               })
@@ -43,7 +42,7 @@ class SellForm extends Component {
           <div className="input-group-append">
             <div className="input-group-text">
               <img src={tokenLogo} height='32' alt="" />
-              DApp
+              PAU
             </div>
           </div>
         </div>
@@ -70,7 +69,7 @@ class SellForm extends Component {
         </div>
         <div className="mb-5">
           <span className="float-left text-muted">Exchange Rate</span>
-          <span className="float-right text-muted">100 DApp = 1 ETH</span>
+          <span className="float-right text-muted">100 PAUken = 1 ETH</span>
         </div>
         <button type="submit" className="btn btn-primary btn-block btn-lg">SWAP!</button>
       </form>
